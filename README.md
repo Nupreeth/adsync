@@ -6,6 +6,9 @@ This project delivers a practical MVP for the assignment:
 2. Input landing page URL.
 3. Output a personalized version of the **same** page, enhanced with CRO principles.
 4. UI is styled with Troopod brand colors from the live stylesheet (`#6B38FB`, `#8C67FF`, `#4B1B96`, `#20C4B3`, `#0D0D0D`).
+5. Includes both:
+   - Streamlit app (`app.py`) for local demo
+   - Vercel-native web app (`index.html` + `api/personalize.py`) for hosted demo
 
 The app preserves original structure and only edits high-impact conversion areas:
 - Hero headline
@@ -116,6 +119,27 @@ Deploy this repo to Streamlit Community Cloud:
 
 This gives a persistent live link for submission.
 
+## Vercel Deploy (Recommended if you want a branded hosted URL)
+
+This repo now includes a Vercel-native interface:
+- frontend: `index.html`
+- API: `api/personalize.py`
+- config: `vercel.json`
+
+Deploy steps:
+1. Import the GitHub repo into Vercel.
+2. Framework preset: `Other`.
+3. Keep project root as repository root.
+4. Add env var (optional but recommended):
+   - `OPENAI_API_KEY`
+5. Deploy.
+
+After deploy, open `/` and test:
+- ad link or upload
+- landing page URL
+- generate personalized page
+- download HTML
+
 ## Demo Quality Tips
 
 1. Avoid `https://example.com` for final demo quality (it is placeholder content).
@@ -126,6 +150,7 @@ This gives a persistent live link for submission.
 ## Submission Files Included
 
 - App implementation: `app.py` + `engine/`
+- Vercel implementation: `index.html`, `api/personalize.py`, `vercel.json`
 - Upload-ready sample ad creative: `assets/sample_ad_creative.png`
 - Google-doc draft content: `docs/GOOGLE_DOC_DRAFT.md`
 - Submission email template: `docs/SUBMISSION_EMAIL_TEMPLATE.txt`

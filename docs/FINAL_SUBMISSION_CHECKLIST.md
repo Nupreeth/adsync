@@ -22,8 +22,8 @@ Option 1: Temporary link (fastest)
 3. Copy generated `https://*.trycloudflare.com` URL.
 
 Option 2: Stable link (recommended)
-1. Deploy GitHub repo on Streamlit Community Cloud.
-2. Set secret: `OPENAI_API_KEY` (optional but recommended).
+1. Deploy GitHub repo on Vercel (framework: `Other`).
+2. Set env var: `OPENAI_API_KEY` (optional but recommended).
 3. Copy app URL.
 
 ## C) Google Doc

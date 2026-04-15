@@ -6,6 +6,9 @@ Live Demo Link:
 Repository:
 https://github.com/Nupreeth/troopod-ad-to-landing-personalizer
 
+Deployment:
+Vercel-hosted web app (`index.html` + Python API `api/personalize.py`)
+
 ## 1) What this system does
 
 This system takes:
@@ -50,6 +53,7 @@ The output is not a full redesign. It keeps the original page and applies focuse
 7. Demo UI follows Troopod brand palette for visual consistency.
 8. CRO quality scorecard shows before vs after quality lift.
 9. If ad signal is weak, system automatically falls back to conservative personalization.
+10. Hosted deployment uses Vercel frontend + Python API while preserving the same engine modules.
 
 ## 3) Key components / agent design
 
