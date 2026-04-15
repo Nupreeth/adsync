@@ -63,7 +63,11 @@ You can also copy `client/.env.example` to `client/.env` if needed.
 
 ## Live demo
 
-`[PASTE LIVE DEMO LINK HERE]`
+https://adsync-one.vercel.app/
+
+Demo inputs:
+- Ad image URL: https://adsync-one.vercel.app/demo-ad.png
+- Landing page URL: https://adsync-one.vercel.app/demo-landing.html
 
 ## Deploy (Free Tier)
 

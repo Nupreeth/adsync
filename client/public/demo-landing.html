@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nimbus CRM - Book More Demos</title>
+    <meta
+      name="description"
+      content="A simple demo landing page for AdSync testing: clear hero, CTA, trust, and risk reversal."
+    />
+    <style>
+      :root {
+        --bg: #0a0a0f;
+        --surface: rgba(255, 255, 255, 0.06);
+        --border: rgba(148, 163, 184, 0.22);
+        --text: #f8fafc;
+        --muted: rgba(148, 163, 184, 0.9);
+        --indigo: #6366f1;
+        --cyan: #22d3ee;
+        --success: #10b981;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        color: var(--text);
+        background: radial-gradient(circle at 12% 10%, rgba(99, 102, 241, 0.22), transparent 45%),
+          radial-gradient(circle at 92% 18%, rgba(34, 211, 238, 0.14), transparent 48%),
+          linear-gradient(180deg, #0a0a0f 0%, #07070b 100%);
+      }
+
+      .wrap {
+        max-width: 1080px;
+        padding: 56px 20px 90px;
+        margin: 0 auto;
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: rgba(10, 10, 15, 0.6);
+        backdrop-filter: blur(10px);
+      }
+
+      .brand {
+        font-weight: 800;
+        letter-spacing: 0.3px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .pill span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: var(--success);
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 28px;
+        align-items: start;
+        margin-top: 28px;
+      }
+
+      @media (max-width: 900px) {
+        .hero {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      h1 {
+        font-size: 48px;
+        line-height: 1.08;
+        margin: 0;
+        letter-spacing: -0.02em;
+      }
+
+      h2 {
+        font-size: 18px;
+        line-height: 1.5;
+        color: var(--muted);
+        font-weight: 500;
+        margin: 14px 0 0;
+        max-width: 62ch;
+      }
+
+      .cta-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 18px;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 16px;
+        border-radius: 14px;
+        text-decoration: none;
+        color: white;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--indigo), #4f46e5);
+        border: 1px solid rgba(99, 102, 241, 0.35);
+        box-shadow: 0 14px 40px rgba(79, 70, 229, 0.22);
+      }
+
+      .ghost {
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        color: var(--muted);
+        text-decoration: none;
+        font-weight: 700;
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .meta {
+        margin-top: 14px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .meta strong {
+        color: rgba(248, 250, 252, 0.92);
+      }
+
+      .card {
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        background: var(--surface);
+        backdrop-filter: blur(10px);
+        padding: 18px;
+      }
+
+      .card h3 {
+        margin: 0 0 10px;
+        font-size: 14px;
+        color: rgba(248, 250, 252, 0.92);
+        letter-spacing: 0.02em;
+      }
+
+      .card p {
+        margin: 10px 0 0;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      @media (max-width: 900px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .trust {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .badge {
+        border: 1px solid rgba(34, 211, 238, 0.28);
+        background: rgba(34, 211, 238, 0.12);
+        color: rgba(224, 251, 255, 0.95);
+        font-weight: 700;
+        border-radius: 999px;
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+
+      .section {
+        margin-top: 34px;
+      }
+
+      form {
+        display: grid;
+        gap: 10px;
+      }
+
+      label {
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(10, 10, 15, 0.35);
+        color: white;
+        padding: 12px 12px;
+        outline: none;
+      }
+
+      .fineprint {
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.45;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="nav">
+        <div class="brand">Nimbus CRM</div>
+        <div class="pill"><span></span> Trusted by 1,200+ teams</div>
+      </div>
+
+      <div class="hero">
+        <div>
+          <h1>Book more demos from the same ad traffic</h1>
+          <h2>
+            Nimbus turns confusing landing pages into a single, clear conversion path. Keep your message consistent from ad click to call booking.
+          </h2>
+
+          <div class="cta-row">
+            <a class="btn" href="#signup">Start free trial</a>
+            <a class="ghost" href="#proof">See proof</a>
+          </div>
+
+          <p class="meta">
+            <strong>4.8 rating</strong> from 340+ reviews. No long-term lock-ins. Cancel anytime.
+          </p>
+
+          <div class="trust" id="proof">
+            <span class="badge">+18% lift in message match</span>
+            <span class="badge">2-week onboarding</span>
+            <span class="badge">SOC2-ready</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>What you get in the first week</h3>
+          <p>1. A cleaned-up hero that mirrors your ad promise.</p>
+          <p>2. A single action CTA that reduces decision fatigue.</p>
+          <p>3. Trust + risk reversal blocks that remove hesitation.</p>
+          <p class="fineprint">
+            Risk reversal: If you do not see improvement in 14 days, we will extend your trial. No questions asked.
+          </p>
+        </div>
+      </div>
+
+      <div class="section grid">
+        <div class="card">
+          <h3>Clarity over clever</h3>
+          <p>Visitors should know what to do within 5 seconds: what it is, who it is for, and why it matters.</p>
+        </div>
+        <div class="card">
+          <h3>One CTA, one intent</h3>
+          <p>We keep a single primary CTA and align the wording with the ad call-to-action to improve continuity.</p>
+        </div>
+      </div>
+
+      <div class="section card" id="signup">
+        <h3>Get your free trial</h3>
+        <form>
+          <div>
+            <label for="email">Work email</label>
+            <input id="email" name="email" type="email" placeholder="you@company.com" />
+          </div>
+          <div>
+            <label for="company">Company</label>
+            <input id="company" name="company" type="text" placeholder="Nimbus Inc." />
+          </div>
+          <a class="btn" href="#signup">Create account</a>
+          <div class="fineprint">
+            By signing up, you agree to our terms. We do not sell your data. This page is intentionally simple for AdSync testing.
+          </div>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
+

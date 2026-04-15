@@ -373,7 +373,7 @@ export default function App() {
             AdSync
           </p>
           <p className="hidden text-sm text-adsync-muted sm:block">
-            Ad-to-page personalization, powered by Claude
+            Ad-to-page personalization, powered by Gemini
           </p>
         </div>
       </header>
