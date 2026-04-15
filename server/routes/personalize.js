@@ -63,7 +63,7 @@ Return this exact JSON:
       "principle": "one of: Social Proof / Urgency / Clarity / Trust / Specificity / Visual Hierarchy"
     }
   ],
-  "grounding_notes": "note any claims you could not verify from either the ad or page — write null if all claims are grounded"
+  "grounding_notes": "note any claims you could not verify from either the ad or page - write null if all claims are grounded"
 }
 
 Generate at least 4 additional_recommendations. Be specific to this page and ad, not generic.
@@ -131,4 +131,3 @@ router.post("/", async (req, res) => {
 });
 
 module.exports = router;
-

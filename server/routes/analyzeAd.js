@@ -3,7 +3,7 @@ const client = require("../utils/claudeClient");
 
 const SYSTEM_PROMPT = `
 You are an expert ad analyst and CRO specialist. Analyze the ad image provided and extract
-structured information. Return ONLY a valid JSON object — no markdown, no backticks,
+structured information. Return ONLY a valid JSON object - no markdown, no backticks,
 no explanation. Just raw JSON.
 `.trim();
 
@@ -21,7 +21,7 @@ Analyze this ad creative and return this exact JSON structure:
   "offer_details": "any specific offer like discount, free trial, etc. Write null if none"
 }
 
-If you cannot read text clearly, make your best inference. Never return empty strings —
+If you cannot read text clearly, make your best inference. Never return empty strings -
 always provide your best guess based on visual context.
 `.trim();
 
@@ -116,4 +116,3 @@ module.exports = (upload) => {
 
   return router;
 };
-

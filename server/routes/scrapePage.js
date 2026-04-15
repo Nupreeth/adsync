@@ -33,7 +33,7 @@ function findCta($) {
 
 function extractTrustSignals($) {
   const results = [];
-  const pattern = /\b(\d+%|\d+\+|trusted|customers|reviews|rating|★)\b/i;
+  const pattern = /\b(\d+%|\d+\+|trusted|customers|reviews|rating|\u2605)\b/i;
   $("p, li, span, div").each((_, el) => {
     const text = clean($(el).text());
     if (!text || text.length < 8) return;
@@ -88,4 +88,3 @@ router.post("/", async (req, res) => {
 });
 
 module.exports = router;
-
