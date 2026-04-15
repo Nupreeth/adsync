@@ -5,14 +5,14 @@ import PersonalizedCard from "./PersonalizedCard";
 import RecommendationsGrid from "./RecommendationsGrid";
 import { IconCopy, IconDownload, IconWarning } from "./Icons";
 
-const TABS = ["Original", "Personalized", "Recommendations"];
+const TABS = ["Preview", "Original", "Personalized", "Recommendations"];
 
 function normalize(value) {
   return (value || "").replace(/\s+/g, " ").trim();
 }
 
-export default function ResultsPanel({ adAnalysis, pageContent, personalized }) {
-  const [tab, setTab] = useState("Original");
+export default function ResultsPanel({ adAnalysis, pageContent, personalized, previewHtml = "" }) {
+  const [tab, setTab] = useState("Preview");
 
   const fields = useMemo(
     () => [
@@ -102,6 +102,19 @@ export default function ResultsPanel({ adAnalysis, pageContent, personalized }) 
     await navigator.clipboard.writeText(htmlSnippet);
   };
 
+  const downloadPreviewHtml = () => {
+    const html = previewHtml || "";
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "adsync-personalized-preview.html";
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <section className="space-y-4 rounded-2xl border border-adsync-border bg-adsync-surface/50 p-4 transition-all duration-500">
       <MessageMatchGauge
@@ -136,6 +149,48 @@ export default function ResultsPanel({ adAnalysis, pageContent, personalized }) 
               changed={changedMap[field.id]}
             />
           ))}
+        </div>
+      ) : null}
+
+      {tab === "Preview" ? (
+        <div className="space-y-3">
+          <div className="rounded-xl border border-adsync-border bg-adsync-surface p-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p className="font-display text-lg font-semibold text-white">Personalized Page Preview</p>
+                <p className="mt-1 text-sm text-adsync-muted">
+                  This keeps the original page and applies lightweight CRO personalization to the hero + CTA.
+                </p>
+              </div>
+              {previewHtml ? (
+                <button
+                  type="button"
+                  onClick={downloadPreviewHtml}
+                  className="rounded-lg border border-adsync-border px-3 py-2 text-sm text-adsync-muted hover:bg-white/10 hover:text-white"
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <IconDownload className="h-4 w-4" /> Download Preview HTML
+                  </span>
+                </button>
+              ) : null}
+            </div>
+          </div>
+
+          {previewHtml ? (
+            <div className="overflow-hidden rounded-2xl border border-adsync-border bg-black/20">
+              <iframe
+                title="Personalized landing page preview"
+                srcDoc={previewHtml}
+                sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"
+                referrerPolicy="no-referrer"
+                className="h-[720px] w-full bg-white"
+              />
+            </div>
+          ) : (
+            <div className="rounded-xl border border-adsync-border bg-adsync-surface/70 p-4 text-sm text-adsync-muted">
+              Preview is not available for this URL. You can still use the Personalized tab to copy the updated copy blocks.
+            </div>
+          )}
         </div>
       ) : null}
 

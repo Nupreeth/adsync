@@ -61,6 +61,7 @@ export default function App() {
   const [adAnalysis, setAdAnalysis] = useState(null);
   const [pageContent, setPageContent] = useState(null);
   const [personalized, setPersonalized] = useState(null);
+  const [previewHtml, setPreviewHtml] = useState("");
 
   const abortRef = useRef(null);
   const slowTimerRef = useRef(null);
@@ -95,6 +96,7 @@ export default function App() {
     setScrapeFailed(false);
     setManualValues(INITIAL_MANUAL);
     setPersonalized(null);
+    setPreviewHtml("");
   };
 
   const setStep = (index, progressValue) => {
@@ -162,6 +164,17 @@ export default function App() {
       signal
     );
 
+  const renderPreview = (personalization, signal) =>
+    requestJson(
+      "/api/render-page",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: landingUrl.trim(), personalized: personalization }),
+      },
+      signal
+    );
+
   const startSlowTimer = () => {
     if (slowTimerRef.current) clearTimeout(slowTimerRef.current);
     slowTimerRef.current = setTimeout(() => {
@@ -192,6 +205,14 @@ export default function App() {
       const output = await personalize(analysis, content, controller.signal);
       setPersonalized(output);
       setAiOutputInvalid(false);
+
+      try {
+        const rendered = await renderPreview(output, controller.signal);
+        setPreviewHtml(rendered?.html || "");
+      } catch (err) {
+        setPreviewHtml("");
+      }
+
       setStep(3, 100);
     } catch (error) {
       if (error.name === "AbortError") return;
@@ -252,6 +273,14 @@ export default function App() {
 
       const output = await personalize(analysis, scraped, controller.signal);
       setPersonalized(output);
+
+      try {
+        const rendered = await renderPreview(output, controller.signal);
+        setPreviewHtml(rendered?.html || "");
+      } catch (err) {
+        setPreviewHtml("");
+      }
+
       setStep(3, 100);
     } catch (error) {
       if (error.name === "AbortError") return;
@@ -447,6 +476,7 @@ export default function App() {
                 adAnalysis={adAnalysis}
                 pageContent={pageContent}
                 personalized={personalized}
+                previewHtml={previewHtml}
               />
             ) : null}
           </div>

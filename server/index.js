@@ -17,6 +17,7 @@ const upload = multer({
 app.use("/api/analyze-ad", require("./routes/analyzeAd")(upload));
 app.use("/api/scrape-page", require("./routes/scrapePage"));
 app.use("/api/personalize", require("./routes/personalize"));
+app.use("/api/render-page", require("./routes/renderPage"));
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
