@@ -12,7 +12,9 @@ The app preserves original structure and only edits high-impact conversion areas
 - Supporting subheadline
 - CTA copy
 - Lightweight CRO inserts (trust proof, risk-reversal, sticky CTA)
-- 3 output variants (`Balanced`, `Trust-First`, `Offer-First`) for quick review
+- Dynamic output variants:
+  - Typical mode: `Balanced`, `Trust-First`, `Offer-First`
+  - Low-signal mode: `Balanced`, `Structure-Safe`
 - CRO quality scorecard (before vs after)
 
 ## Assumptions
@@ -76,6 +78,12 @@ python -m streamlit run app.py
 
 Open `http://localhost:8501`.
 
+If port `8501` is busy:
+
+```bash
+python -m streamlit run app.py --server.port 8508
+```
+
 ## Create a Public Demo Link Fast (Cloudflare Tunnel)
 
 This creates a live public URL for demo sharing without deployment setup:
@@ -107,6 +115,13 @@ Deploy this repo to Streamlit Community Cloud:
 4. Add `OPENAI_API_KEY` in app secrets if desired.
 
 This gives a persistent live link for submission.
+
+## Demo Quality Tips
+
+1. Avoid `https://example.com` for final demo quality (it is placeholder content).
+2. Use a real landing page with clear headline/CTA structure.
+3. Best output quality is with `OPENAI_API_KEY` set.
+4. If ad signal is weak, app intentionally switches to conservative (`Structure-Safe`) mode.
 
 ## Submission Files Included
 

@@ -12,16 +12,16 @@ Brief Explanation (Google Doc):
 [PASTE GOOGLE DOC LINK]
 
 Repository / Code:
-[PASTE GITHUB LINK]
+https://github.com/Nupreeth/troopod-ad-to-landing-personalizer
 
 What is included:
 - Ad input + landing page URL workflow
 - Personalized version of existing landing page (not full rebuild)
 - CRO-oriented enhancements on key sections
 - Guardrails for random changes, broken UI, hallucinations, and inconsistent outputs
+- Variant comparison mode + conservative fallback for low-signal inputs
 
 Happy to walk through the system live if helpful.
 
 Best regards,
 [YOUR NAME]
-

@@ -1,5 +1,11 @@
 # Troopod Assignment - AI Personalization System Brief
 
+Live Demo Link:
+[PASTE LIVE LINK]
+
+Repository:
+https://github.com/Nupreeth/troopod-ad-to-landing-personalizer
+
 ## 1) What this system does
 
 This system takes:
@@ -10,7 +16,9 @@ Then produces:
 1. A personalized version of the **same landing page**
 2. CRO enhancements on key conversion touchpoints
 3. Change log + guardrail notes for transparency
-4. Three usable variants for reviewer choice: Balanced, Trust-First, Offer-First
+4. Reviewer-ready variants for comparison:
+   - Typical mode: Balanced, Trust-First, Offer-First
+   - Low-signal mode: Balanced, Structure-Safe
 
 The output is not a full redesign. It keeps the original page and applies focused improvements to conversion-critical sections.
 
@@ -41,6 +49,7 @@ The output is not a full redesign. It keeps the original page and applies focuse
 6. Final personalized page is shown in preview and downloadable as HTML.
 7. Demo UI follows Troopod brand palette for visual consistency.
 8. CRO quality scorecard shows before vs after quality lift.
+9. If ad signal is weak, system automatically falls back to conservative personalization.
 
 ## 3) Key components / agent design
 
@@ -92,14 +101,21 @@ The output is not a full redesign. It keeps the original page and applies focuse
 - Low-temperature JSON-constrained generation for consistency.
 - Each run returns change logs + warning messages for auditability.
 
-## 5) Product assumptions
+## 5) Demo assumptions (explicit)
+
+1. Landing URL quality impacts personalization quality heavily.
+2. `example.com` is placeholder-only and not used for final quality demo.
+3. For strongest results, OpenAI API key is provided in deployment secrets.
+4. If ad signal is weak, conservative mode is preferable to unsafe over-editing.
+
+## 6) Product assumptions
 
 1. Some ad signals are missing or low quality.
 2. Some landing pages block scraping or rely heavily on client-side rendering.
 3. Assignment values practical prototype behavior over edge-perfect extraction.
 4. Main objective is measurable conversion clarity, not visual redesign.
 
-## 6) What can be improved next
+## 7) What can be improved next
 
 1. JS-rendered page support via Playwright snapshotting.
 2. More robust selector confidence scoring.
