@@ -1,6 +1,0 @@
-beautifulsoup4>=4.12,<5
-flask>=3,<4
-lxml>=5,<6
-openai>=1.0,<2
-requests>=2.31,<3
-streamlit>=1.32,<2
