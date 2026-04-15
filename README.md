@@ -70,3 +70,23 @@ You can also copy `client/.env.example` to `client/.env` if needed.
 
 `[PASTE LIVE DEMO LINK HERE]`
 
+## Deploy (Free Tier)
+
+### Backend (Render)
+
+- Create a new `Web Service` from the GitHub repo.
+- Build command: `npm install`
+- Start command: `npm start`
+- Env vars:
+  - `ANTHROPIC_API_KEY` (required)
+  - `PORT` (optional, Render sets this automatically)
+
+### Frontend (Vercel)
+
+- Create a new Vercel project from the same GitHub repo.
+- Project settings:
+  - Install command: `npm install`
+  - Build command: `npm run build` (or `npm run vercel-build`)
+  - Output directory: `client/dist`
+- Env vars:
+  - `VITE_API_URL` = your Render backend URL (for example `https://your-service.onrender.com`)

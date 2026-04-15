@@ -7,7 +7,9 @@
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "node --watch server/index.js",
     "dev:client": "vite --config client/vite.config.js",
+    "build": "npm run build:client",
     "build:client": "vite build --config client/vite.config.js",
+    "vercel-build": "npm run build:client",
     "start": "node server/index.js"
   },
   "dependencies": {
@@ -30,4 +32,3 @@
     "vite": "^5.0.0"
   }
 }
-
