@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AdSync</title>
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              adsync: {
+                bg: "#0A0A0F",
+                surface: "#13131A",
+                border: "#1E1E2E",
+                primary: "#6366F1",
+                secondary: "#22D3EE",
+                success: "#10B981",
+                warning: "#F59E0B",
+                danger: "#EF4444",
+                text: "#F8FAFC",
+                muted: "#94A3B8",
+              },
+            },
+            fontFamily: {
+              display: ["Syne", "sans-serif"],
+              body: ["DM Sans", "sans-serif"],
+            },
+            boxShadow: {
+              glow: "0 0 0 1px rgba(99,102,241,0.35), 0 12px 30px rgba(79,70,229,0.25)",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="font-body text-adsync-text">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+

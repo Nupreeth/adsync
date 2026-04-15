@@ -1,8 +1,7 @@
-.venv/
-__pycache__/
-.pytest_cache/
-.mypy_cache/
-*.pyc
+node_modules/
 .env
-*.log
-tmp/
+dist/
+client/dist/
+npm-debug.log*
+yarn-error.log*
+
