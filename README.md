@@ -38,7 +38,6 @@ Copy `.env.example` to `.env` in project root:
 GEMINI_API_KEY=...
 GEMINI_MODEL=gemini-1.5-flash
 PORT=3001
-VITE_API_URL=http://localhost:3001
 ```
 
 You can also copy `client/.env.example` to `client/.env` if needed.
@@ -68,22 +67,10 @@ You can also copy `client/.env.example` to `client/.env` if needed.
 
 ## Deploy (Free Tier)
 
-### Backend (Render)
+### Vercel (Frontend + API, no Render)
 
-- Create a new `Web Service` from the GitHub repo.
-- Build command: `npm install`
-- Start command: `npm start`
-- Env vars:
+- Create a new Vercel project from the GitHub repo.
+- Env vars (Vercel Project Settings -> Environment Variables):
   - `GEMINI_API_KEY` (required)
   - `GEMINI_MODEL` (optional)
-  - `PORT` (optional, Render sets this automatically)
-
-### Frontend (Vercel)
-
-- Create a new Vercel project from the same GitHub repo.
-- Project settings:
-  - Install command: `npm install`
-  - Build command: `npm run build` (or `npm run vercel-build`)
-  - Output directory: `client/dist`
-- Env vars:
-  - `VITE_API_URL` = your Render backend URL (for example `https://your-service.onrender.com`)
+- Deploy.
