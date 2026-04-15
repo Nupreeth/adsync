@@ -1,11 +1,11 @@
 const express = require("express");
-const client = require("../utils/claudeClient");
+const axios = require("axios");
+const { cleanJson, getGeminiModel, getText } = require("../utils/geminiClient");
 
-const SYSTEM_PROMPT = `
-You are an expert ad analyst and CRO specialist. Analyze the ad image provided and extract
-structured information. Return ONLY a valid JSON object - no markdown, no backticks,
-no explanation. Just raw JSON.
-`.trim();
+const MODEL = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36";
+
+const SYSTEM_PROMPT = `You are an expert ad analyst and CRO specialist. Analyze the ad image provided and extract structured information. Return ONLY a valid JSON object. No markdown. No backticks. No explanation. Just raw JSON.`;
 
 const USER_PROMPT = `
 Analyze this ad creative and return this exact JSON structure:
@@ -25,14 +25,23 @@ If you cannot read text clearly, make your best inference. Never return empty st
 always provide your best guess based on visual context.
 `.trim();
 
-function extractText(response) {
-  if (!response || !Array.isArray(response.content)) return "";
-  const block = response.content.find((item) => item.type === "text");
-  return block?.text || "";
-}
+async function fetchImageAsInlineData(imageUrl) {
+  const response = await axios.get(imageUrl, {
+    timeout: 15000,
+    responseType: "arraybuffer",
+    headers: { "User-Agent": USER_AGENT },
+    validateStatus: () => true,
+  });
 
-function cleanClaudeJson(rawText) {
-  return rawText.replace(/```json|```/gi, "").trim();
+  if (response.status !== 200) {
+    const error = new Error("IMAGE_FETCH_FAILED");
+    error.code = "IMAGE_FETCH_FAILED";
+    throw error;
+  }
+
+  const mimeType = response.headers?.["content-type"] || "image/jpeg";
+  const data = Buffer.from(response.data).toString("base64");
+  return { data, mimeType };
 }
 
 function buildFallback(payload) {
@@ -56,8 +65,8 @@ module.exports = (upload) => {
 
   router.post("/", upload.single("image"), async (req, res) => {
     try {
-      if (!process.env.ANTHROPIC_API_KEY) {
-        return res.status(500).json({ error: "ANTHROPIC_API_KEY_MISSING" });
+      if (!process.env.GEMINI_API_KEY) {
+        return res.status(500).json({ error: "GEMINI_API_KEY_MISSING" });
       }
 
       const imageUrl = req.body?.imageUrl;
@@ -67,36 +76,24 @@ module.exports = (upload) => {
         return res.status(400).json({ error: "AD_IMAGE_REQUIRED" });
       }
 
-      const content = [{ type: "text", text: USER_PROMPT }];
+      const prompt = `${SYSTEM_PROMPT}\n\n${USER_PROMPT}`;
+      const model = getGeminiModel(MODEL, { maxOutputTokens: 1500, temperature: 0.2 });
 
-      if (file) {
-        content.push({
-          type: "image",
-          source: {
-            type: "base64",
-            media_type: file.mimetype || "image/png",
-            data: file.buffer.toString("base64"),
+      const inlineData = file
+        ? { data: file.buffer.toString("base64"), mimeType: file.mimetype || "image/png" }
+        : await fetchImageAsInlineData(imageUrl);
+
+      const result = await model.generateContent([
+        prompt,
+        {
+          inlineData: {
+            data: inlineData.data,
+            mimeType: inlineData.mimeType,
           },
-        });
-      } else {
-        content.push({
-          type: "image",
-          source: {
-            type: "url",
-            url: imageUrl,
-          },
-        });
-      }
+        },
+      ]);
 
-      const response = await client.messages.create({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 2000,
-        temperature: 0.2,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: "user", content }],
-      });
-
-      const raw = cleanClaudeJson(extractText(response));
+      const raw = cleanJson(getText(result));
       let parsed;
       try {
         parsed = JSON.parse(raw);

@@ -16,7 +16,7 @@ and returns a personalized, CRO-aligned version of the landing page copy with:
 - Frontend: React + Vite
 - Styling: Tailwind via CDN + custom CSS
 - Backend: Node.js + Express
-- AI: Anthropic Claude (`claude-sonnet-4-20250514`)
+- AI: Google Gemini API (`GEMINI_MODEL`)
 - Scraping: axios + cheerio
 - Upload: multer
 
@@ -35,23 +35,19 @@ This starts:
 Copy `.env.example` to `.env` in project root:
 
 ```env
-ANTHROPIC_API_KEY=sk-ant-...
+GEMINI_API_KEY=...
+GEMINI_MODEL=gemini-1.5-flash
 PORT=3001
 VITE_API_URL=http://localhost:3001
 ```
 
 You can also copy `client/.env.example` to `client/.env` if needed.
 
-## Claude settings used
+## Gemini settings used
 
-- Ad analysis:
-  - `model: "claude-sonnet-4-20250514"`
-  - `max_tokens: 2000`
-  - `temperature: 0.2`
-- Personalization:
-  - `model: "claude-sonnet-4-20250514"`
-  - `max_tokens: 4000`
-  - `temperature: 0.3`
+- Model: `GEMINI_MODEL` (default `gemini-1.5-flash`)
+- Ad analysis: `maxOutputTokens: 1500`, `temperature: 0.2`
+- Personalization: `maxOutputTokens: 2500`, `temperature: 0.3`
 
 ## API routes
 
@@ -78,7 +74,8 @@ You can also copy `client/.env.example` to `client/.env` if needed.
 - Build command: `npm install`
 - Start command: `npm start`
 - Env vars:
-  - `ANTHROPIC_API_KEY` (required)
+  - `GEMINI_API_KEY` (required)
+  - `GEMINI_MODEL` (optional)
   - `PORT` (optional, Render sets this automatically)
 
 ### Frontend (Vercel)

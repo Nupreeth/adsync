@@ -1,8 +1,10 @@
 const express = require("express");
-const client = require("../utils/claudeClient");
+const { cleanJson, getGeminiModel, getText } = require("../utils/geminiClient");
 const validateOutput = require("../utils/validateOutput");
 
 const router = express.Router();
+
+const MODEL = process.env.GEMINI_MODEL || "gemini-1.5-flash";
 
 const SYSTEM_PROMPT = `
 You are a world-class CRO expert and conversion copywriter. You will receive analysis of an
@@ -12,16 +14,6 @@ they landed in exactly the right place.
 
 Return ONLY a valid JSON object. No markdown. No backticks. No explanation. Raw JSON only.
 `.trim();
-
-function clean(text) {
-  return (text || "").replace(/```json|```/gi, "").trim();
-}
-
-function extractText(response) {
-  if (!response || !Array.isArray(response.content)) return "";
-  const block = response.content.find((item) => item.type === "text");
-  return block?.text || "";
-}
 
 function buildPrompt(adAnalysis, pageContent, retry = false) {
   const retryNote = retry
@@ -71,27 +63,16 @@ ${retryNote}
 `.trim();
 }
 
-async function callClaude(userPrompt) {
-  const response = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 4000,
-    temperature: 0.3,
-    system: SYSTEM_PROMPT,
-    messages: [
-      {
-        role: "user",
-        content: [{ type: "text", text: userPrompt }],
-      },
-    ],
-  });
-
-  return clean(extractText(response));
+async function callGemini(userPrompt) {
+  const model = getGeminiModel(MODEL, { maxOutputTokens: 2500, temperature: 0.3 });
+  const result = await model.generateContent(`${SYSTEM_PROMPT}\n\n${userPrompt}`);
+  return cleanJson(getText(result));
 }
 
 router.post("/", async (req, res) => {
   try {
-    if (!process.env.ANTHROPIC_API_KEY) {
-      return res.status(500).json({ error: "ANTHROPIC_API_KEY_MISSING" });
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: "GEMINI_API_KEY_MISSING" });
     }
 
     const { adAnalysis, pageContent } = req.body || {};
@@ -103,7 +84,7 @@ router.post("/", async (req, res) => {
     let parsed = null;
 
     try {
-      parsed = JSON.parse(await callClaude(firstPrompt));
+      parsed = JSON.parse(await callGemini(firstPrompt));
     } catch (err) {
       parsed = null;
     }
@@ -111,7 +92,7 @@ router.post("/", async (req, res) => {
     if (!validateOutput(parsed)) {
       const secondPrompt = buildPrompt(adAnalysis, pageContent, true);
       try {
-        parsed = JSON.parse(await callClaude(secondPrompt));
+        parsed = JSON.parse(await callGemini(secondPrompt));
       } catch (err) {
         parsed = null;
       }
