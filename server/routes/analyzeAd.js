@@ -1,8 +1,6 @@
 const express = require("express");
 const axios = require("axios");
-const { cleanJson, getGeminiModel, getText } = require("../utils/geminiClient");
-
-const MODEL = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+const { generateContentWithFallback, safeJsonParse, getText } = require("../utils/geminiClient");
 const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36";
 
 const SYSTEM_PROMPT = `You are an expert ad analyst and CRO specialist. Analyze the ad image provided and extract structured information. Return ONLY a valid JSON object. No markdown. No backticks. No explanation. Just raw JSON.`;
@@ -77,29 +75,27 @@ module.exports = (upload) => {
       }
 
       const prompt = `${SYSTEM_PROMPT}\n\n${USER_PROMPT}`;
-      const model = getGeminiModel(MODEL, { maxOutputTokens: 1500, temperature: 0.2 });
 
       const inlineData = file
         ? { data: file.buffer.toString("base64"), mimeType: file.mimetype || "image/png" }
         : await fetchImageAsInlineData(imageUrl);
 
-      const result = await model.generateContent([
-        prompt,
-        {
-          inlineData: {
-            data: inlineData.data,
-            mimeType: inlineData.mimeType,
+      const { result } = await generateContentWithFallback({
+        vision: true,
+        generationConfig: { maxOutputTokens: 1500, temperature: 0.2 },
+        content: [
+          prompt,
+          {
+            inlineData: {
+              data: inlineData.data,
+              mimeType: inlineData.mimeType,
+            },
           },
-        },
-      ]);
+        ],
+      });
 
-      const raw = cleanJson(getText(result));
-      let parsed;
-      try {
-        parsed = JSON.parse(raw);
-      } catch (err) {
-        return res.status(422).json({ error: "AI_OUTPUT_INVALID" });
-      }
+      const parsed = safeJsonParse(getText(result));
+      if (!parsed) return res.status(422).json({ error: "AI_OUTPUT_INVALID" });
 
       const normalized = buildFallback(parsed);
       return res.json(normalized);

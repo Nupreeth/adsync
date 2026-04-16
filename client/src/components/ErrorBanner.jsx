@@ -1,10 +1,11 @@
 export default function ErrorBanner({ message, type = "error", onClose }) {
   if (!message) return null;
 
-  const classes =
-    type === "warning"
-      ? "border-adsync-warning/40 bg-adsync-warning/10 text-amber-200"
-      : "border-adsync-danger/40 bg-adsync-danger/10 text-rose-200";
+  const classes = (() => {
+    if (type === "success") return "border-adsync-success/40 bg-adsync-success/10 text-emerald-200";
+    if (type === "warning") return "border-adsync-warning/40 bg-adsync-warning/10 text-amber-200";
+    return "border-adsync-danger/40 bg-adsync-danger/10 text-rose-200";
+  })();
 
   return (
     <div className={`rounded-xl border px-4 py-3 text-sm ${classes}`}>

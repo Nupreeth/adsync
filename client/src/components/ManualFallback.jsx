@@ -31,7 +31,7 @@ export default function ManualFallback({ values, onChange, onSubmit, loading }) 
         type="button"
         onClick={onSubmit}
         disabled={loading}
-        className="mt-4 rounded-xl border border-adsync-primary bg-adsync-primary px-4 py-2 font-display text-white hover:bg-indigo-500 disabled:opacity-50"
+        className="mt-4 rounded-xl border border-adsync-primary bg-adsync-primary px-4 py-2 font-display text-white hover:bg-adsync-primary/90 disabled:opacity-50"
       >
         {loading ? "Processing..." : "Try Again with Manual Input"}
       </button>

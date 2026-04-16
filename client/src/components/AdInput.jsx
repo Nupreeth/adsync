@@ -82,7 +82,7 @@ export default function AdInput({
 
           {!adFile ? (
             <div className="flex h-[200px] flex-col items-center justify-center gap-2 text-center">
-              <div className="text-indigo-200">
+              <div className="text-adsync-primary/90">
                 <IconUpload className="h-9 w-9" />
               </div>
               <p className="text-lg font-medium text-white">Drop ad image here</p>

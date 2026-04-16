@@ -134,7 +134,7 @@ export default function App() {
       const error = new Error(body.error || "Request failed");
       error.code = body.error || "REQUEST_FAILED";
       error.status = response.status;
-      error.details = body.message || "";
+      error.details = body.message || `Endpoint: ${path}`;
       throw error;
     }
     return body;
@@ -380,11 +380,13 @@ export default function App() {
     <div className="min-h-screen bg-adsync-bg text-adsync-text">
       <header className="fixed inset-x-0 top-0 z-50 h-[60px] border-b border-adsync-border bg-adsync-bg/95 backdrop-blur">
         <div className="mx-auto flex h-full w-full max-w-6xl items-center justify-between px-4">
-          <p className="inline-flex items-center gap-2 font-display text-xl font-bold text-indigo-300">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500/15 text-indigo-200 ring-1 ring-indigo-400/30">
+          <p className="inline-flex items-center gap-2 font-display text-xl font-extrabold">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-adsync-primary/15 text-adsync-primary ring-1 ring-adsync-primary/35">
               <IconBolt className="h-5 w-5" />
             </span>
-            AdSync
+            <span className="bg-gradient-to-r from-adsync-primary to-adsync-secondary bg-clip-text text-transparent">
+              AdSync
+            </span>
           </p>
           <p className="hidden text-sm text-adsync-muted sm:block">
             Ad-to-page personalization, powered by Gemini
@@ -401,6 +403,27 @@ export default function App() {
             Paste your ad and landing page. Get personalized copy that matches your message, in
             seconds.
           </p>
+
+          <div className="mt-6 flex flex-col items-center justify-center gap-2 sm:flex-row">
+            <button
+              type="button"
+              onClick={() => {
+                const origin = window.location.origin;
+                setAdMode("url");
+                setAdImageUrl(`${origin}/demo-ad.png`);
+                setAdImageUrlPreview(`${origin}/demo-ad.png`);
+                setLandingUrl(`${origin}/demo-landing.html`);
+                setAdImageUrlError("");
+                setErrorBanner({ message: "Demo inputs loaded.", type: "success" });
+              }}
+              className="inline-flex items-center justify-center rounded-full border border-adsync-border bg-adsync-surface/60 px-4 py-2 text-sm text-white transition hover:border-adsync-primary/60 hover:bg-adsync-primary/10"
+            >
+              Load Demo Ad + Landing Page
+            </button>
+            <p className="text-sm text-adsync-muted">
+              Use this if you don&apos;t have a real ad URL handy.
+            </p>
+          </div>
         </section>
 
         <section className="mt-8 space-y-4">

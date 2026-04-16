@@ -3,10 +3,10 @@ import { IconArrowUpRight } from "./Icons";
 const PRINCIPLE_COLORS = {
   "Social Proof": "bg-blue-500/20 text-blue-200 border-blue-400/30",
   Urgency: "bg-red-500/20 text-red-200 border-red-400/30",
-  Clarity: "bg-purple-500/20 text-purple-200 border-purple-400/30",
+  Clarity: "bg-adsync-primary/15 text-white border-adsync-primary/40",
   Trust: "bg-green-500/20 text-green-200 border-green-400/30",
   Specificity: "bg-amber-500/20 text-amber-200 border-amber-400/30",
-  "Visual Hierarchy": "bg-cyan-500/20 text-cyan-200 border-cyan-400/30",
+  "Visual Hierarchy": "bg-adsync-secondary/15 text-white border-adsync-secondary/40",
 };
 
 export default function RecommendationsGrid({ recommendations = [] }) {

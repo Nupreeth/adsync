@@ -1,10 +1,8 @@
 const express = require("express");
-const { cleanJson, getGeminiModel, getText } = require("../utils/geminiClient");
+const { generateContentWithFallback, safeJsonParse, getText } = require("../utils/geminiClient");
 const validateOutput = require("../utils/validateOutput");
 
 const router = express.Router();
-
-const MODEL = process.env.GEMINI_MODEL || "gemini-1.5-flash";
 
 const SYSTEM_PROMPT = `
 You are a world-class CRO expert and conversion copywriter. You will receive analysis of an
@@ -14,6 +12,103 @@ they landed in exactly the right place.
 
 Return ONLY a valid JSON object. No markdown. No backticks. No explanation. Raw JSON only.
 `.trim();
+
+function cleanText(value) {
+  return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function clampScore(value, fallback) {
+  const n = typeof value === "string" ? Number(value) : value;
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(0, Math.min(100, Math.round(n)));
+}
+
+function ensureArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function normalizeOutput(payload, adAnalysis, pageContent) {
+  const output = payload && typeof payload === "object" ? { ...payload } : {};
+
+  output.new_headline =
+    cleanText(output.new_headline) ||
+    cleanText(adAnalysis?.headline) ||
+    cleanText(pageContent?.h1) ||
+    "A better fit for your ad click";
+
+  output.new_subheadline =
+    cleanText(output.new_subheadline) ||
+    cleanText(adAnalysis?.value_proposition) ||
+    cleanText(pageContent?.h2) ||
+    "A clearer next step, aligned to what you just clicked.";
+
+  output.new_cta_text =
+    cleanText(output.new_cta_text) ||
+    cleanText(adAnalysis?.cta_text) ||
+    cleanText(pageContent?.cta_text) ||
+    "Get Started";
+
+  output.new_hero_body =
+    cleanText(output.new_hero_body) ||
+    cleanText(pageContent?.body_copy) ||
+    "Continue your journey with a clearer offer, less friction, and a single next step.";
+
+  output.message_match_score_before = clampScore(output.message_match_score_before, 35);
+  output.message_match_score_after = clampScore(output.message_match_score_after, 70);
+
+  output.cro_rationale = output.cro_rationale && typeof output.cro_rationale === "object" ? output.cro_rationale : {};
+  output.cro_rationale.headline =
+    cleanText(output.cro_rationale.headline) || "Aligned the headline to mirror the ad promise for continuity.";
+  output.cro_rationale.subheadline =
+    cleanText(output.cro_rationale.subheadline) || "Added supporting value context to reduce uncertainty after the click.";
+  output.cro_rationale.cta =
+    cleanText(output.cro_rationale.cta) || "Matched the CTA intent to the ad so the next step feels obvious.";
+  output.cro_rationale.body =
+    cleanText(output.cro_rationale.body) || "Reduced friction with shorter, benefit-led hero copy.";
+
+  const recommendations = ensureArray(output.additional_recommendations).map((item) => ({
+    title: cleanText(item?.title),
+    description: cleanText(item?.description),
+    principle: cleanText(item?.principle),
+  }));
+
+  output.additional_recommendations = recommendations.filter(
+    (item) => item.title && item.description && item.principle
+  );
+
+  if (output.additional_recommendations.length === 0) {
+    output.additional_recommendations = [
+      {
+        title: "Add high-signal trust near the CTA",
+        description: "Place a short proof point (logos, ratings, or a number) directly under the primary CTA.",
+        principle: "Trust",
+      },
+      {
+        title: "Tighten hero into one promise + one next step",
+        description: "Keep the hero focused: one outcome, one CTA, and one supporting line to reduce choice overload.",
+        principle: "Clarity",
+      },
+      {
+        title: "Add risk reversal next to the CTA",
+        description: "Call out free cancellation, no credit card, or money-back terms to reduce hesitation.",
+        principle: "Trust",
+      },
+      {
+        title: "Make the offer specific",
+        description: "Use concrete details from the ad (numbers, timeframe, or inclusions) to increase credibility.",
+        principle: "Specificity",
+      },
+    ];
+  }
+
+  if (output.grounding_notes === undefined) output.grounding_notes = null;
+  if (output.grounding_notes !== null) {
+    const grounding = cleanText(output.grounding_notes);
+    output.grounding_notes = grounding ? grounding : null;
+  }
+
+  return output;
+}
 
 function buildPrompt(adAnalysis, pageContent, retry = false) {
   const retryNote = retry
@@ -40,8 +135,8 @@ Return this exact JSON:
   "new_subheadline": "rewritten h2 or subheadline",
   "new_cta_text": "rewritten CTA button text",
   "new_hero_body": "2-3 sentence rewritten hero body copy",
-  "message_match_score_before": <number 0-100, how well original page matched the ad>,
-  "message_match_score_after": <number 0-100, how well your new copy matches the ad>,
+  "message_match_score_before": 0,
+  "message_match_score_after": 0,
   "cro_rationale": {
     "headline": "one sentence explaining why you changed it",
     "subheadline": "one sentence explaining why you changed it",
@@ -55,18 +150,22 @@ Return this exact JSON:
       "principle": "one of: Social Proof / Urgency / Clarity / Trust / Specificity / Visual Hierarchy"
     }
   ],
-  "grounding_notes": "note any claims you could not verify from either the ad or page - write null if all claims are grounded"
+  "grounding_notes": null
 }
 
 Generate at least 4 additional_recommendations. Be specific to this page and ad, not generic.
+message_match_score_before and message_match_score_after must be numbers from 0 to 100.
 ${retryNote}
 `.trim();
 }
 
 async function callGemini(userPrompt) {
-  const model = getGeminiModel(MODEL, { maxOutputTokens: 2500, temperature: 0.3 });
-  const result = await model.generateContent(`${SYSTEM_PROMPT}\n\n${userPrompt}`);
-  return cleanJson(getText(result));
+  const { result } = await generateContentWithFallback({
+    vision: false,
+    generationConfig: { maxOutputTokens: 2500, temperature: 0.3 },
+    content: `${SYSTEM_PROMPT}\n\n${userPrompt}`,
+  });
+  return getText(result);
 }
 
 router.post("/", async (req, res) => {
@@ -84,20 +183,22 @@ router.post("/", async (req, res) => {
     let parsed = null;
 
     try {
-      parsed = JSON.parse(await callGemini(firstPrompt));
+      parsed = safeJsonParse(await callGemini(firstPrompt));
     } catch (err) {
       parsed = null;
     }
 
+    parsed = normalizeOutput(parsed, adAnalysis, pageContent);
     if (!validateOutput(parsed)) {
       const secondPrompt = buildPrompt(adAnalysis, pageContent, true);
       try {
-        parsed = JSON.parse(await callGemini(secondPrompt));
+        parsed = safeJsonParse(await callGemini(secondPrompt));
       } catch (err) {
         parsed = null;
       }
     }
 
+    parsed = normalizeOutput(parsed, adAnalysis, pageContent);
     if (!validateOutput(parsed)) {
       return res.status(422).json({ error: "AI_OUTPUT_INVALID" });
     }
