@@ -40,6 +40,18 @@ async function parseResponse(response) {
   return body;
 }
 
+function formatRequestError(error) {
+  if (!error) return "Request failed.";
+  const code = error.code || "";
+  const details = error.details || "";
+  const status = Number.isFinite(error.status) ? ` (HTTP ${error.status})` : "";
+
+  if (code && details) return `${code}${status}: ${details}`;
+  if (code) return `${code}${status}`;
+  if (error.message) return error.message;
+  return "Connection error. Check your internet and try again.";
+}
+
 export default function App() {
   const [adMode, setAdMode] = useState("upload");
   const [adFile, setAdFile] = useState(null);
@@ -121,6 +133,8 @@ export default function App() {
     if (!response.ok) {
       const error = new Error(body.error || "Request failed");
       error.code = body.error || "REQUEST_FAILED";
+      error.status = response.status;
+      error.details = body.message || "";
       throw error;
     }
     return body;
@@ -225,7 +239,7 @@ export default function App() {
         });
       } else {
         setErrorBanner({
-          message: "Connection error. Check your internet and try again.",
+          message: formatRequestError(error),
           type: "error",
         });
       }
@@ -295,7 +309,7 @@ export default function App() {
         setScrapeFailed(true);
       } else {
         setErrorBanner({
-          message: "Connection error. Check your internet and try again.",
+          message: formatRequestError(error),
           type: "error",
         });
       }
