@@ -117,6 +117,11 @@ export default function ResultsPanel({ adAnalysis, pageContent, personalized, pr
 
   return (
     <section className="space-y-4 rounded-2xl border border-adsync-border bg-adsync-surface/50 p-4 transition-all duration-500">
+      {personalized?._fallback_used ? (
+        <div className="rounded-xl border border-adsync-warning/40 bg-adsync-warning/10 p-4 text-sm text-amber-200">
+          AI was busy, so AdSync used a safe fallback to keep the demo running. Try again later for richer personalization.
+        </div>
+      ) : null}
       <MessageMatchGauge
         before={personalized?.message_match_score_before}
         after={personalized?.message_match_score_after}
