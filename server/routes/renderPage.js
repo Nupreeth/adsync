@@ -158,7 +158,7 @@ router.post("/", async (req, res) => {
           <div style="color:rgba(248,250,252,0.92); font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
             Ready to continue?
           </div>
-          <a href="${stickyHref}" style="display:inline-flex; align-items:center; justify-content:center; padding:0.65rem 0.95rem; border-radius:12px; background:linear-gradient(135deg,#6366F1,#4F46E5); color:white; font-weight:700; text-decoration:none;">
+          <a href="${stickyHref}" style="display:inline-flex; align-items:center; justify-content:center; padding:0.65rem 0.95rem; border-radius:12px; background:linear-gradient(135deg,#6B38FB,#20C4B3); color:white; font-weight:700; text-decoration:none;">
             ${escapeHtml(stickyCtaText)}
           </a>
         </div>
