@@ -205,10 +205,21 @@ router.post("/", async (req, res) => {
 
     return res.json(parsed);
   } catch (error) {
-    return res.status(500).json({
-      error: "PERSONALIZE_FAILED",
-      message: error?.message || "Unknown personalization error",
-    });
+    const message = String(error?.message || "Unknown personalization error");
+    if (
+      error?.code === "GEMINI_MODEL_UNAVAILABLE" ||
+      /\[503\b/i.test(message) ||
+      /high demand/i.test(message) ||
+      /service unavailable/i.test(message)
+    ) {
+      return res.status(503).json({ error: "MODEL_BUSY", message });
+    }
+
+    if (/\[429\b/i.test(message) || /too many requests/i.test(message)) {
+      return res.status(429).json({ error: "RATE_LIMITED", message });
+    }
+
+    return res.status(500).json({ error: "PERSONALIZE_FAILED", message });
   }
 });
 

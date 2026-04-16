@@ -100,10 +100,21 @@ module.exports = (upload) => {
       const normalized = buildFallback(parsed);
       return res.json(normalized);
     } catch (error) {
-      return res.status(500).json({
-        error: "ANALYZE_AD_FAILED",
-        message: error?.message || "Unknown error",
-      });
+      const message = String(error?.message || "Unknown error");
+      if (
+        error?.code === "GEMINI_MODEL_UNAVAILABLE" ||
+        /\[503\b/i.test(message) ||
+        /high demand/i.test(message) ||
+        /service unavailable/i.test(message)
+      ) {
+        return res.status(503).json({ error: "MODEL_BUSY", message });
+      }
+
+      if (/\[429\b/i.test(message) || /too many requests/i.test(message)) {
+        return res.status(429).json({ error: "RATE_LIMITED", message });
+      }
+
+      return res.status(500).json({ error: "ANALYZE_AD_FAILED", message });
     }
   });
 

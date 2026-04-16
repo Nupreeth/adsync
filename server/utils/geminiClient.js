@@ -61,7 +61,10 @@ function scoreModelName(name, vision) {
   if (lower.includes("pro")) score += 3;
   if (lower.includes("vision")) score += vision ? 6 : 1;
   // Mild preference for newer families when present.
-  if (lower.includes("2.")) score += 2;
+  if (lower.includes("2.0")) score += 3;
+  if (lower.includes("2.")) score += 1;
+  // De-prioritize models that frequently show "high demand" errors.
+  if (lower.includes("2.5")) score -= 3;
   return score;
 }
 
@@ -73,6 +76,9 @@ async function getModelCandidates({ vision = false } = {}) {
     vision ? process.env.GEMINI_VISION_MODEL || process.env.GEMINI_MODEL : process.env.GEMINI_MODEL
   );
   uniquePush(candidates, envModel);
+
+  const defaults = vision ? DEFAULT_VISION_MODELS : DEFAULT_TEXT_MODELS;
+  defaults.forEach((name) => uniquePush(candidates, name));
 
   const now = Date.now();
   if (!cachedModels || now - cachedModelsAt > MODEL_CACHE_TTL_MS) {
@@ -92,14 +98,23 @@ async function getModelCandidates({ vision = false } = {}) {
   fromApi
     .map((name) => ({ name, score: scoreModelName(name, vision) }))
     .sort((a, b) => b.score - a.score)
-    .slice(0, 10)
+    .slice(0, 12)
     .forEach((entry) => uniquePush(candidates, entry.name));
-
-  const defaults = vision ? DEFAULT_VISION_MODELS : DEFAULT_TEXT_MODELS;
-  defaults.forEach((name) => uniquePush(candidates, name));
 
   // Keep the retry list small to avoid long tail latency.
   return candidates.filter(Boolean).slice(0, 6);
+}
+
+function isBusyError(error) {
+  const message = String(error?.message || "");
+  return (
+    /\[503\b/i.test(message) ||
+    /service unavailable/i.test(message) ||
+    /high demand/i.test(message) ||
+    /\[429\b/i.test(message) ||
+    /too many requests/i.test(message) ||
+    /resource has been exhausted/i.test(message)
+  );
 }
 
 function shouldTryNextModel(error) {
@@ -109,7 +124,8 @@ function shouldTryNextModel(error) {
     /not found for api version/i.test(message) ||
     /not supported for generatecontent/i.test(message) ||
     /does not support/i.test(message) ||
-    /unsupported/i.test(message)
+    /unsupported/i.test(message) ||
+    isBusyError(error)
   );
 }
 
@@ -123,8 +139,24 @@ async function generateContentWithFallback({ vision = false, generationConfig = 
   for (const modelName of modelCandidates) {
     try {
       const model = genAI.getGenerativeModel({ model: modelName, generationConfig });
-      const result = await model.generateContent(content);
-      return { result, modelName };
+
+      // Retry a couple times on transient "busy" errors before switching models.
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        try {
+          const result = await model.generateContent(content);
+          return { result, modelName };
+        } catch (error) {
+          lastError = error;
+          if (!isBusyError(error)) throw error;
+          // Backoff: 250ms, 750ms
+          const waitMs = attempt === 0 ? 250 : 750;
+          // eslint-disable-next-line no-await-in-loop
+          await new Promise((resolve) => setTimeout(resolve, waitMs));
+        }
+      }
+
+      // Still busy after retries - try the next model.
+      continue;
     } catch (error) {
       lastError = error;
       if (shouldTryNextModel(error)) continue;
