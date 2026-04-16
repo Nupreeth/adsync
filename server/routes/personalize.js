@@ -110,6 +110,42 @@ function normalizeOutput(payload, adAnalysis, pageContent) {
   return output;
 }
 
+function isModelBusy(error) {
+  const message = String(error?.message || "");
+  return (
+    error?.code === "GEMINI_MODEL_UNAVAILABLE" ||
+    /\[503\b/i.test(message) ||
+    /high demand/i.test(message) ||
+    /service unavailable/i.test(message) ||
+    /\[429\b/i.test(message) ||
+    /too many requests/i.test(message) ||
+    /resource has been exhausted/i.test(message)
+  );
+}
+
+function buildDeterministicPersonalization(adAnalysis, pageContent, reason) {
+  const analysis = adAnalysis || {};
+  const page = pageContent || {};
+
+  const base = normalizeOutput(
+    {
+      message_match_score_before: 35,
+      message_match_score_after: 70,
+      grounding_notes: reason ? `AI model unavailable (${reason}). Output generated using deterministic fallback.` : null,
+      additional_recommendations: [],
+    },
+    analysis,
+    page
+  );
+
+  // Make the scores look sane in low-signal mode.
+  base.message_match_score_before = Math.min(base.message_match_score_before, base.message_match_score_after - 10);
+
+  base._fallback_used = true;
+  base._fallback_reason = reason || "MODEL_BUSY";
+  return base;
+}
+
 function buildPrompt(adAnalysis, pageContent, retry = false) {
   const retryNote = retry
     ? '\nIMPORTANT: Your previous response was invalid. Return ONLY the raw JSON object, nothing else. No markdown formatting.'
@@ -205,20 +241,12 @@ router.post("/", async (req, res) => {
 
     return res.json(parsed);
   } catch (error) {
-    const message = String(error?.message || "Unknown personalization error");
-    if (
-      error?.code === "GEMINI_MODEL_UNAVAILABLE" ||
-      /\[503\b/i.test(message) ||
-      /high demand/i.test(message) ||
-      /service unavailable/i.test(message)
-    ) {
-      return res.status(503).json({ error: "MODEL_BUSY", message });
+    if (isModelBusy(error)) {
+      const fallback = buildDeterministicPersonalization(req.body?.adAnalysis, req.body?.pageContent, "MODEL_BUSY");
+      return res.status(200).json(fallback);
     }
 
-    if (/\[429\b/i.test(message) || /too many requests/i.test(message)) {
-      return res.status(429).json({ error: "RATE_LIMITED", message });
-    }
-
+    const message = String(error?.details || error?.message || "Unknown personalization error");
     return res.status(500).json({ error: "PERSONALIZE_FAILED", message });
   }
 });

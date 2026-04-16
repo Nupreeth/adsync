@@ -58,6 +58,19 @@ function buildFallback(payload) {
   };
 }
 
+function isModelBusy(error) {
+  const message = String(error?.message || "");
+  return (
+    error?.code === "GEMINI_MODEL_UNAVAILABLE" ||
+    /\[503\b/i.test(message) ||
+    /high demand/i.test(message) ||
+    /service unavailable/i.test(message) ||
+    /\[429\b/i.test(message) ||
+    /too many requests/i.test(message) ||
+    /resource has been exhausted/i.test(message)
+  );
+}
+
 module.exports = (upload) => {
   const router = express.Router();
 
@@ -100,20 +113,15 @@ module.exports = (upload) => {
       const normalized = buildFallback(parsed);
       return res.json(normalized);
     } catch (error) {
-      const message = String(error?.message || "Unknown error");
-      if (
-        error?.code === "GEMINI_MODEL_UNAVAILABLE" ||
-        /\[503\b/i.test(message) ||
-        /high demand/i.test(message) ||
-        /service unavailable/i.test(message)
-      ) {
-        return res.status(503).json({ error: "MODEL_BUSY", message });
+      // For the demo, do not block the whole flow on transient model issues.
+      if (isModelBusy(error)) {
+        const fallback = buildFallback({});
+        fallback._fallback_used = true;
+        fallback._fallback_reason = "MODEL_BUSY";
+        return res.status(200).json(fallback);
       }
 
-      if (/\[429\b/i.test(message) || /too many requests/i.test(message)) {
-        return res.status(429).json({ error: "RATE_LIMITED", message });
-      }
-
+      const message = String(error?.details || error?.message || "Unknown error");
       return res.status(500).json({ error: "ANALYZE_AD_FAILED", message });
     }
   });
